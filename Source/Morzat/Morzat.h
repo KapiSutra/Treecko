@@ -4,7 +4,7 @@
 
 #include "Modules/ModuleManager.h"
 
-class FMorzatModule : public IModuleInterface
+class FMorzatModule final : public IModuleInterface
 {
 public:
 
