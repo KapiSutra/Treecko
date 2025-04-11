@@ -82,6 +82,7 @@ void UMorzatStateTreeSchema::PostLoad()
     Super::PostLoad();
 }
 
+#if WITH_EDITOR
 void UMorzatStateTreeSchema::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeChainProperty(PropertyChangedEvent);
@@ -107,3 +108,4 @@ void UMorzatStateTreeSchema::PostEditChangeChainProperty(FPropertyChangedChainEv
         }
     }
 }
+#endif

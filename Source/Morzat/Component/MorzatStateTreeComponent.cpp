@@ -5,7 +5,6 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "MorzatContextProviderInterface.h"
 #include "StateTreeExecutionContext.h"
 #include "GameFramework/PlayerState.h"
 #include "Morzat/Schema/MorzatStateTreeSchema.h"
@@ -17,6 +16,7 @@ UMorzatStateTreeComponent::UMorzatStateTreeComponent()
     // Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
     // off to improve performance if you don't need them.
     PrimaryComponentTick.bCanEverTick = true;
+    bWantsInitializeComponent = true;
 
     // ...
 }
@@ -26,76 +26,110 @@ TSubclassOf<UStateTreeSchema> UMorzatStateTreeComponent::GetSchema() const
     return UMorzatStateTreeSchema::StaticClass();
 }
 
-bool UMorzatStateTreeComponent::SetContextRequirements(FStateTreeExecutionContext& Context, bool bLogErrors)
+void UMorzatStateTreeComponent::BeginPlay()
+{
+    Super::BeginPlay();
+    UpdateActorContext();
+}
+
+void UMorzatStateTreeComponent::InitializeComponent()
+{
+    Super::InitializeComponent();
+}
+
+bool UMorzatStateTreeComponent::SetContextRequirements(FStateTreeExecutionContext& Context, const bool bLogErrors)
 {
     auto Result = Super::SetContextRequirements(Context, bLogErrors);
-    const auto Schema = CastChecked<UMorzatStateTreeSchema>(Context.GetStateTree()->GetSchema());
 
-    if (Schema && Result && Context.IsValid())
+    Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextOwner, ActorContext.Owner.Get());
+    Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextAvatar, ActorContext.Avatar.Get());
+    Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextStateTreeComponent, this);
+    Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextMeshComponent,
+                                 ActorContext.MeshComponent.Get());
+    Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextAbilitySystemComponent,
+                                 ActorContext.AbilitySystemComponent.Get());
+
+    const auto* Schema = CastChecked<UMorzatStateTreeSchema>(Context.GetStateTree()->GetSchema());
+
+    Result &= ActorContext.Owner && ActorContext.Owner->IsA(Schema->OwnerType);
+    Result &= ActorContext.Avatar && ActorContext.Avatar->IsA(Schema->AvatarType);
+    Result &= this->IsA(Schema->StateTreeComponentType);
+    Result &= !!ActorContext.MeshComponent;
+    Result &= !!ActorContext.AbilitySystemComponent;
+
+    return Result;
+}
+
+void UMorzatStateTreeComponent::UpdateActorContext()
+{
+    ActorContext.Owner = GetOwner();
+    ActorContext.AbilitySystemComponent = SearchAbilitySystemComponent();
+
+    if (ensure(ActorContext.AbilitySystemComponent))
     {
-        const auto Owner = GetOwner();
-        Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextOwner, Owner);
+        ActorContext.Avatar = ActorContext.AbilitySystemComponent->GetAvatarActor();
+        ActorContext.MeshComponent = ActorContext.AbilitySystemComponent->AbilityActorInfo->
+                                                  SkeletalMeshComponent.Get();
+    }
+}
 
-        AActor* Avatar = nullptr;
-        USkeletalMeshComponent* MeshComponent;
-        UAbilitySystemComponent* AbilitySystemComponent =
-            UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Owner);
+UAbilitySystemComponent* UMorzatStateTreeComponent::SearchAbilitySystemComponent()
+{
+    const auto Owner = GetOwner();
 
-        if (!AbilitySystemComponent)
+    UAbilitySystemComponent* Result = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Owner);
+
+    if (Result)
+    {
+        return Result;
+    }
+
+    if (const auto PawnOwner = Cast<APawn>(Owner))
+    {
+        if (const auto Controller = PawnOwner->GetController())
         {
-            if (const auto ControllerOwner = Cast<AController>(Owner))
+            Result = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller);
+            if (Result)
             {
-                AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
-                    ControllerOwner->GetPawn());
+                return Result;
+            }
 
-                if (!AbilitySystemComponent)
+            if (const auto PC = Cast<APlayerController>(Controller))
+            {
+                if (const auto PS = PC->PlayerState)
                 {
-                    if (const auto PlayerControllerOwner = Cast<APlayerController>(Owner))
+                    Result = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PS);
+                    if (Result)
                     {
-                        AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
-                            PlayerControllerOwner->PlayerState);
+                        return Result;
                     }
                 }
             }
         }
-
-
-        if (Owner->Implements<UMorzatContextProviderInterface>())
-        {
-            Avatar = IMorzatContextProviderInterface::Execute_GetAvatar(Owner);
-        }
-        else if (AbilitySystemComponent)
-        {
-            Avatar = AbilitySystemComponent->GetAvatarActor();
-        }
-
-        if (!Avatar)
-        {
-            Avatar = Owner;
-        }
-
-        if (AbilitySystemComponent)
-        {
-            MeshComponent = AbilitySystemComponent->AbilityActorInfo->SkeletalMeshComponent.Get();
-        }
-        else
-        {
-            MeshComponent = Avatar->FindComponentByClass<USkeletalMeshComponent>();
-        }
-
-        Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextAvatar, Avatar);
-        Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextStateTreeComponent, this);
-        Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextMeshComponent, MeshComponent);
-        Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextAbilitySystemComponent,
-                                     AbilitySystemComponent);
-
-        Result &= Owner && Owner->IsA(Schema->OwnerType);
-        Result &= Avatar && Avatar->IsA(Schema->AvatarType);
-        Result &= this->IsA(Schema->StateTreeComponentType);
     }
-    else
+
+    if (const auto ControllerOwner = Cast<AController>(Owner))
     {
-        Result &= false;
+        if (const auto Pawn = ControllerOwner->GetPawn())
+        {
+            Result = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Pawn);
+            if (Result)
+            {
+                return Result;
+            }
+        }
+
+        if (const auto PCOwner = Cast<APlayerController>(ControllerOwner))
+        {
+            if (const auto PS = PCOwner->PlayerState)
+            {
+                Result = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PS);
+                if (Result)
+                {
+                    return Result;
+                }
+            }
+        }
     }
 
 
