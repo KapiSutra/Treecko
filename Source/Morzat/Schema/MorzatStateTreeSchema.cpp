@@ -15,9 +15,9 @@ namespace Morzat
 {
     const FName FStateTreeContextDataNames::ContextOwner = TEXT("Owner");
     const FName FStateTreeContextDataNames::ContextAvatar = TEXT("Avatar");
-    const FName FStateTreeContextDataNames::ContextStateTreeComponent = TEXT("StateTreeComponent");
-    const FName FStateTreeContextDataNames::ContextMeshComponent = TEXT("MeshComponent");
-    const FName FStateTreeContextDataNames::ContextAbilitySystemComponent = TEXT("AbilitySystemComponent");
+    const FName FStateTreeContextDataNames::ContextStateTreeComponent = TEXT("State Tree Component");
+    const FName FStateTreeContextDataNames::ContextMeshComponent = TEXT("Mesh Component");
+    const FName FStateTreeContextDataNames::ContextAbilitySystemComponent = TEXT("Ability System Component");
 }
 
 

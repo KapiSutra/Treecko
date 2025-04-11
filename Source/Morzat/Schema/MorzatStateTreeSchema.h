@@ -29,6 +29,7 @@ class MORZAT_API UMorzatStateTreeSchema : public UStateTreeSchema
 {
     GENERATED_BODY()
 
+public:
     UMorzatStateTreeSchema();
 
 protected:
