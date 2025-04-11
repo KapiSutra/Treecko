@@ -89,9 +89,9 @@ bool UMorzatStateTreeComponent::SetContextRequirements(FStateTreeExecutionContex
         Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextAbilitySystemComponent,
                                      AbilitySystemComponent);
 
-        Result &= Owner->IsA(Schema->OwnerType);
-        Result &= Avatar->IsA(Schema->AvatarType);
-        Result &= Avatar->IsA(Schema->StateTreeComponentType);
+        Result &= Owner && Owner->IsA(Schema->OwnerType);
+        Result &= Avatar && Avatar->IsA(Schema->AvatarType);
+        Result &= this->IsA(Schema->StateTreeComponentType);
     }
     else
     {

@@ -40,7 +40,7 @@ UMorzatStateTreeSchema::UMorzatStateTreeSchema(): StateTreeComponentType(UStateT
             FGuid("3DABE82CEB204BEF9111AE0800B1647E")
         },
         {
-            Morzat::FStateTreeContextDataNames::ContextStateTreeComponent,
+            Morzat::FStateTreeContextDataNames::ContextMeshComponent,
             USkeletalMeshComponent::StaticClass(),
             FGuid("C151B3D68FFE4318B6C0383A102D4B97")
         },
