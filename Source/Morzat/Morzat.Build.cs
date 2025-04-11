@@ -45,6 +45,7 @@ public class Morzat : ModuleRules
                 "StateTreeModule",
                 "GameplayAbilities",
                 "GameplayStateTreeModule",
+                "AIModule"
                 // ... add private dependencies that you statically link with here ...	
             }
         );

@@ -24,7 +24,7 @@ namespace Morzat
 /**
  * 
  */
-UCLASS(BlueprintType, EditInlineNew, meta=(CommonSchema))
+UCLASS(BlueprintType, EditInlineNew, meta=(CommonSchema), DisplayName = "Morzat StateTree")
 class MORZAT_API UMorzatStateTreeSchema : public UStateTreeSchema
 {
     GENERATED_BODY()
