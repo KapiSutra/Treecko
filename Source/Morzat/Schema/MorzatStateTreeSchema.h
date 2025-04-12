@@ -37,7 +37,7 @@ protected:
     virtual bool IsStructAllowed(const UScriptStruct* InScriptStruct) const override;
     virtual bool IsClassAllowed(const UClass* InScriptStruct) const override;
     virtual bool IsExternalItemAllowed(const UStruct& InStruct) const override;
-
+    
     virtual void PostLoad() override;
     //
 

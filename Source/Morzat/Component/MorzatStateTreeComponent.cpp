@@ -39,7 +39,10 @@ void UMorzatStateTreeComponent::InitializeComponent()
 
 bool UMorzatStateTreeComponent::SetContextRequirements(FStateTreeExecutionContext& Context, const bool bLogErrors)
 {
-    auto Result = Super::SetContextRequirements(Context, bLogErrors);
+    // auto Result = Super::SetContextRequirements(Context, bLogErrors);
+    bool Result = Context.IsValid();
+
+    Context.SetLinkedStateTreeOverrides(&LinkedStateTreeOverrides);
 
     Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextOwner, ActorContext.Owner.Get());
     Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextAvatar, ActorContext.Avatar.Get());
@@ -65,12 +68,14 @@ void UMorzatStateTreeComponent::UpdateActorContext()
     ActorContext.Owner = GetOwner();
     ActorContext.AbilitySystemComponent = SearchAbilitySystemComponent();
 
-    if (ensure(ActorContext.AbilitySystemComponent))
+    if ((ActorContext.AbilitySystemComponent))
     {
         ActorContext.Avatar = ActorContext.AbilitySystemComponent->GetAvatarActor();
         ActorContext.MeshComponent = ActorContext.AbilitySystemComponent->AbilityActorInfo->
                                                   SkeletalMeshComponent.Get();
     }
+
+    PostActorContextUpdated.Broadcast();
 }
 
 UAbilitySystemComponent* UMorzatStateTreeComponent::SearchAbilitySystemComponent()

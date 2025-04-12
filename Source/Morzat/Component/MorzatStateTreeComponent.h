@@ -27,6 +27,8 @@ struct MORZAT_API FMorzatStateTreeComponentContext
 };
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMorzatActorContextUpdatedDelegate);
+
 UCLASS(ClassGroup=(Morzat), meta=(BlueprintSpawnableComponent))
 class MORZAT_API UMorzatStateTreeComponent : public UStateTreeComponent
 {
@@ -50,6 +52,9 @@ public:
     // Should Be Called Each Time After AbilitySystemComponent::InitAbilityActorInfo
     UFUNCTION(BlueprintCallable)
     void UpdateActorContext();
+
+    UPROPERTY(BlueprintAssignable)
+    FMorzatActorContextUpdatedDelegate PostActorContextUpdated;
 
     virtual UAbilitySystemComponent* SearchAbilitySystemComponent();
 };
