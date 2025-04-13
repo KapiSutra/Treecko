@@ -75,7 +75,7 @@ void UMorzatStateTreeComponent::UpdateActorContext()
                                                   SkeletalMeshComponent.Get();
     }
 
-    PostActorContextUpdated.Broadcast();
+    OnActorContextUpdated.Broadcast();
 }
 
 UAbilitySystemComponent* UMorzatStateTreeComponent::SearchAbilitySystemComponent()
@@ -93,12 +93,6 @@ UAbilitySystemComponent* UMorzatStateTreeComponent::SearchAbilitySystemComponent
     {
         if (const auto Controller = PawnOwner->GetController())
         {
-            Result = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller);
-            if (Result)
-            {
-                return Result;
-            }
-
             if (const auto PC = Cast<APlayerController>(Controller))
             {
                 if (const auto PS = PC->PlayerState)

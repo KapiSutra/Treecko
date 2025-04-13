@@ -54,7 +54,7 @@ public:
     void UpdateActorContext();
 
     UPROPERTY(BlueprintAssignable)
-    FMorzatActorContextUpdatedDelegate PostActorContextUpdated;
+    FMorzatActorContextUpdatedDelegate OnActorContextUpdated;
 
     virtual UAbilitySystemComponent* SearchAbilitySystemComponent();
 };
