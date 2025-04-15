@@ -4,7 +4,7 @@
 
 #include "Modules/ModuleManager.h"
 
-class FMorzatModule final : public IModuleInterface
+class FTreeckoModule final : public IModuleInterface
 {
 public:
 

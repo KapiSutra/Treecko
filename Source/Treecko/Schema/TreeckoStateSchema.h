@@ -5,11 +5,11 @@
 #include "CoreMinimal.h"
 #include "StateTreeSchema.h"
 #include "Components/StateTreeComponent.h"
-#include "MorzatStateTreeSchema.generated.h"
+#include "TreeckoStateSchema.generated.h"
 
 class UStateTreeComponent;
 
-namespace Morzat
+namespace Treecko
 {
     struct FStateTreeContextDataNames
     {
@@ -24,13 +24,13 @@ namespace Morzat
 /**
  * 
  */
-UCLASS(BlueprintType, EditInlineNew, meta=(CommonSchema), DisplayName = "Morzat StateTree")
-class MORZAT_API UMorzatStateTreeSchema : public UStateTreeSchema
+UCLASS(BlueprintType, EditInlineNew, meta=(CommonSchema), DisplayName = "Treecko StateTree")
+class TREECKO_API UTreeckoStateSchema : public UStateTreeSchema
 {
     GENERATED_BODY()
 
 public:
-    UMorzatStateTreeSchema();
+    UTreeckoStateSchema();
 
 protected:
     virtual TConstArrayView<FStateTreeExternalDataDesc> GetContextDataDescs() const override;

@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/StateTreeComponent.h"
-#include "MorzatStateTreeComponent.generated.h"
+#include "TreeckoStateComponent.generated.h"
 
 class UAbilitySystemComponent;
 
 USTRUCT(BlueprintType)
-struct MORZAT_API FMorzatStateTreeComponentContext
+struct TREECKO_API FTreeckoStateComponentContext
 {
     GENERATED_BODY()
 
@@ -27,16 +27,16 @@ struct MORZAT_API FMorzatStateTreeComponentContext
 };
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMorzatActorContextUpdatedDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTreeckoActorContextUpdatedDelegate);
 
-UCLASS(ClassGroup=(Morzat), meta=(BlueprintSpawnableComponent))
-class MORZAT_API UMorzatStateTreeComponent : public UStateTreeComponent
+UCLASS(ClassGroup=(Treecko), meta=(BlueprintSpawnableComponent))
+class TREECKO_API UTreeckoStateComponent : public UStateTreeComponent
 {
     GENERATED_BODY()
 
 public:
     // Sets default values for this component's properties
-    UMorzatStateTreeComponent();
+    UTreeckoStateComponent();
     virtual TSubclassOf<UStateTreeSchema> GetSchema() const override;
 
     virtual void BeginPlay() override;
@@ -47,14 +47,14 @@ protected:
 
 public:
     UPROPERTY(BlueprintReadOnly)
-    FMorzatStateTreeComponentContext ActorContext;
+    FTreeckoStateComponentContext ActorContext;
 
     // Should Be Called Each Time After AbilitySystemComponent::InitAbilityActorInfo
     UFUNCTION(BlueprintCallable)
     void UpdateActorContext();
 
     UPROPERTY(BlueprintAssignable)
-    FMorzatActorContextUpdatedDelegate OnActorContextUpdated;
+    FTreeckoActorContextUpdatedDelegate OnActorContextUpdated;
 
     virtual UAbilitySystemComponent* SearchAbilitySystemComponent();
 };

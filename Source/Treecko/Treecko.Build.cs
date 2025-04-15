@@ -4,9 +4,9 @@ using UnrealBuildTool;
 
 // ReSharper disable UseCollectionExpression
 
-public class Morzat : ModuleRules
+public class Treecko : ModuleRules
 {
-    public Morzat(ReadOnlyTargetRules Target) : base(Target)
+    public Treecko(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 

@@ -1,17 +1,17 @@
 ﻿// Copyright 2019-Present tarnishablec. All Rights Reserved.
 
 
-#include "MorzatStateTreeComponent.h"
+#include "TreeckoStateComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "StateTreeExecutionContext.h"
 #include "GameFramework/PlayerState.h"
-#include "Morzat/Schema/MorzatStateTreeSchema.h"
+#include "Treecko/Schema/TreeckoStateSchema.h"
 
 
 // Sets default values for this component's properties
-UMorzatStateTreeComponent::UMorzatStateTreeComponent()
+UTreeckoStateComponent::UTreeckoStateComponent()
 {
     // Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
     // off to improve performance if you don't need them.
@@ -21,38 +21,38 @@ UMorzatStateTreeComponent::UMorzatStateTreeComponent()
     // ...
 }
 
-TSubclassOf<UStateTreeSchema> UMorzatStateTreeComponent::GetSchema() const
+TSubclassOf<UStateTreeSchema> UTreeckoStateComponent::GetSchema() const
 {
-    return UMorzatStateTreeSchema::StaticClass();
+    return UTreeckoStateSchema::StaticClass();
 }
 
-void UMorzatStateTreeComponent::BeginPlay()
+void UTreeckoStateComponent::BeginPlay()
 {
     Super::BeginPlay();
     UpdateActorContext();
 }
 
-void UMorzatStateTreeComponent::InitializeComponent()
+void UTreeckoStateComponent::InitializeComponent()
 {
     Super::InitializeComponent();
 }
 
-bool UMorzatStateTreeComponent::SetContextRequirements(FStateTreeExecutionContext& Context, const bool bLogErrors)
+bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& Context, const bool bLogErrors)
 {
     // auto Result = Super::SetContextRequirements(Context, bLogErrors);
     bool Result = Context.IsValid();
 
     Context.SetLinkedStateTreeOverrides(&LinkedStateTreeOverrides);
 
-    Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextOwner, ActorContext.Owner.Get());
-    Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextAvatar, ActorContext.Avatar.Get());
-    Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextStateTreeComponent, this);
-    Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextMeshComponent,
+    Context.SetContextDataByName(Treecko::FStateTreeContextDataNames::ContextOwner, ActorContext.Owner.Get());
+    Context.SetContextDataByName(Treecko::FStateTreeContextDataNames::ContextAvatar, ActorContext.Avatar.Get());
+    Context.SetContextDataByName(Treecko::FStateTreeContextDataNames::ContextStateTreeComponent, this);
+    Context.SetContextDataByName(Treecko::FStateTreeContextDataNames::ContextMeshComponent,
                                  ActorContext.MeshComponent.Get());
-    Context.SetContextDataByName(Morzat::FStateTreeContextDataNames::ContextAbilitySystemComponent,
+    Context.SetContextDataByName(Treecko::FStateTreeContextDataNames::ContextAbilitySystemComponent,
                                  ActorContext.AbilitySystemComponent.Get());
 
-    const auto* Schema = CastChecked<UMorzatStateTreeSchema>(Context.GetStateTree()->GetSchema());
+    const auto* Schema = CastChecked<UTreeckoStateSchema>(Context.GetStateTree()->GetSchema());
 
     Result &= ActorContext.Owner && ActorContext.Owner->IsA(Schema->OwnerType);
     Result &= ActorContext.Avatar && ActorContext.Avatar->IsA(Schema->AvatarType);
@@ -63,7 +63,7 @@ bool UMorzatStateTreeComponent::SetContextRequirements(FStateTreeExecutionContex
     return Result;
 }
 
-void UMorzatStateTreeComponent::UpdateActorContext()
+void UTreeckoStateComponent::UpdateActorContext()
 {
     ActorContext.Owner = GetOwner();
     ActorContext.AbilitySystemComponent = SearchAbilitySystemComponent();
@@ -78,7 +78,7 @@ void UMorzatStateTreeComponent::UpdateActorContext()
     OnActorContextUpdated.Broadcast();
 }
 
-UAbilitySystemComponent* UMorzatStateTreeComponent::SearchAbilitySystemComponent()
+UAbilitySystemComponent* UTreeckoStateComponent::SearchAbilitySystemComponent()
 {
     const auto Owner = GetOwner();
 
