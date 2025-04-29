@@ -41,6 +41,8 @@ public:
 
     virtual void BeginPlay() override;
     virtual void InitializeComponent() override;
+    virtual void StartLogic() override;
+    virtual void BeginDestroy() override;
 
 protected:
     virtual bool SetContextRequirements(FStateTreeExecutionContext& Context, bool bLogErrors = false) override;
@@ -49,7 +51,6 @@ public:
     UPROPERTY(BlueprintReadOnly)
     FTreeckoStateComponentContext ActorContext;
 
-    // Should Be Called Each Time After AbilitySystemComponent::InitAbilityActorInfo
     UFUNCTION(BlueprintCallable)
     void UpdateActorContext();
 

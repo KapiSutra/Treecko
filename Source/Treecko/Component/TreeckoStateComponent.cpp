@@ -29,12 +29,23 @@ TSubclassOf<UStateTreeSchema> UTreeckoStateComponent::GetSchema() const
 void UTreeckoStateComponent::BeginPlay()
 {
     Super::BeginPlay();
-    UpdateActorContext();
 }
 
 void UTreeckoStateComponent::InitializeComponent()
 {
     Super::InitializeComponent();
+}
+
+void UTreeckoStateComponent::StartLogic()
+{
+    UpdateActorContext();
+    Super::StartLogic();
+}
+
+void UTreeckoStateComponent::BeginDestroy()
+{
+    StopLogic("");
+    Super::BeginDestroy();
 }
 
 bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& Context, const bool bLogErrors)
@@ -68,7 +79,7 @@ void UTreeckoStateComponent::UpdateActorContext()
     ActorContext.Owner = GetOwner();
     ActorContext.AbilitySystemComponent = SearchAbilitySystemComponent();
 
-    if ((ActorContext.AbilitySystemComponent))
+    if (ActorContext.AbilitySystemComponent)
     {
         ActorContext.Avatar = ActorContext.AbilitySystemComponent->GetAvatarActor();
         ActorContext.MeshComponent = ActorContext.AbilitySystemComponent->AbilityActorInfo->
