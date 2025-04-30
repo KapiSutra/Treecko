@@ -9,7 +9,7 @@
 class UAbilitySystemComponent;
 
 USTRUCT(BlueprintType)
-struct TREECKO_API FTreeckoStateComponentContext
+struct TREECKO_API FTreeckoStateTreeActorContext
 {
     GENERATED_BODY()
 
@@ -43,15 +43,16 @@ public:
     virtual void InitializeComponent() override;
     virtual void StartLogic() override;
     virtual void BeginDestroy() override;
+    virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
     virtual bool SetContextRequirements(FStateTreeExecutionContext& Context, bool bLogErrors = false) override;
 
 public:
-    UPROPERTY(BlueprintReadOnly)
-    FTreeckoStateComponentContext ActorContext;
+    UPROPERTY(BlueprintReadOnly, Replicated)
+    FTreeckoStateTreeActorContext ActorContext;
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Server, Reliable)
     void UpdateActorContext();
 
     UPROPERTY(BlueprintAssignable)

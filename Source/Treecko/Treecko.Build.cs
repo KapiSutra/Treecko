@@ -46,7 +46,8 @@ public class Treecko : ModuleRules
                 "StateTreeModule",
                 "GameplayAbilities",
                 "GameplayStateTreeModule",
-                "AIModule"
+                "AIModule",
+                "NetCore"
                 // ... add private dependencies that you statically link with here ...	
             }
         );

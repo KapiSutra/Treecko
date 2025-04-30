@@ -7,6 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "StateTreeExecutionContext.h"
 #include "GameFramework/PlayerState.h"
+#include "Net/UnrealNetwork.h"
 #include "Treecko/Schema/TreeckoStateSchema.h"
 
 
@@ -48,6 +49,17 @@ void UTreeckoStateComponent::BeginDestroy()
     Super::BeginDestroy();
 }
 
+void UTreeckoStateComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    constexpr FDoRepLifetimeParams Params{
+        .Condition = COND_OwnerOnly,
+        .RepNotifyCondition = REPNOTIFY_OnChanged,
+        .bIsPushBased = true
+    };
+    DOREPLIFETIME_WITH_PARAMS(ThisClass, ActorContext, Params);
+}
+
 bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& Context, const bool bLogErrors)
 {
     // auto Result = Super::SetContextRequirements(Context, bLogErrors);
@@ -74,7 +86,7 @@ bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& 
     return Result;
 }
 
-void UTreeckoStateComponent::UpdateActorContext()
+void UTreeckoStateComponent::UpdateActorContext_Implementation()
 {
     ActorContext.Owner = GetOwner();
     ActorContext.AbilitySystemComponent = SearchAbilitySystemComponent();
@@ -85,7 +97,7 @@ void UTreeckoStateComponent::UpdateActorContext()
         ActorContext.MeshComponent = ActorContext.AbilitySystemComponent->AbilityActorInfo->
                                                   SkeletalMeshComponent.Get();
     }
-
+    MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ActorContext, this);
     OnActorContextUpdated.Broadcast();
 }
 
