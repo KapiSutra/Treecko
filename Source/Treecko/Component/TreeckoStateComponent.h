@@ -24,12 +24,18 @@ struct TREECKO_API FTreeckoStateTreeActorContext
 
     UPROPERTY(BlueprintReadOnly)
     TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+
+    bool operator==(const FTreeckoStateTreeActorContext& Other) const
+    {
+        return Owner == Other.Owner && Avatar == Other.Avatar && MeshComponent == Other.MeshComponent &&
+            AbilitySystemComponent == Other.AbilitySystemComponent;
+    }
 };
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTreeckoActorContextUpdatedDelegate);
 
-UCLASS(ClassGroup=(Treecko), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Treecko), meta=(BlueprintSpawnableComponent), Blueprintable)
 class TREECKO_API UTreeckoStateComponent : public UStateTreeComponent
 {
     GENERATED_BODY()
@@ -52,11 +58,20 @@ public:
     UPROPERTY(BlueprintReadOnly, Replicated)
     FTreeckoStateTreeActorContext ActorContext;
 
-    UFUNCTION(BlueprintCallable, Server, Reliable)
+    UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Treecko")
+    void SetAbilitySystemComponent(UPARAM(DisplayName="Ability System Component")
+        UAbilitySystemComponent* InAbilitySystemComponent);
+
+    UFUNCTION(BlueprintCallable, NetMulticast, Reliable)
     void UpdateActorContext();
 
     UPROPERTY(BlueprintAssignable)
     FTreeckoActorContextUpdatedDelegate OnActorContextUpdated;
 
-    virtual UAbilitySystemComponent* SearchAbilitySystemComponent();
+    UFUNCTION(BlueprintNativeEvent)
+    UAbilitySystemComponent* SearchAbilitySystemComponent();
+
+private:
+    UPROPERTY(Replicated)
+    TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 };

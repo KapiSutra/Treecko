@@ -58,6 +58,7 @@ void UTreeckoStateComponent::GetLifetimeReplicatedProps(TArray<class FLifetimePr
         .bIsPushBased = true
     };
     DOREPLIFETIME_WITH_PARAMS(ThisClass, ActorContext, Params);
+    DOREPLIFETIME_WITH_PARAMS(ThisClass, AbilitySystemComponent, Params);
 }
 
 bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& Context, const bool bLogErrors)
@@ -83,27 +84,44 @@ bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& 
     Result &= !!ActorContext.MeshComponent;
     Result &= !!ActorContext.AbilitySystemComponent;
 
+    if (!Result)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Treecko Context Requirement not Satisfied"))
+    }
+
     return Result;
+}
+
+void UTreeckoStateComponent::SetAbilitySystemComponent(
+    UAbilitySystemComponent* InAbilitySystemComponent)
+{
+    COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, AbilitySystemComponent, InAbilitySystemComponent, this);
 }
 
 void UTreeckoStateComponent::UpdateActorContext_Implementation()
 {
-    ActorContext.Owner = GetOwner();
-    ActorContext.AbilitySystemComponent = SearchAbilitySystemComponent();
+    FTreeckoStateTreeActorContext NewContext{};
+    NewContext.Owner = GetOwner();
+    NewContext.AbilitySystemComponent = SearchAbilitySystemComponent();
 
-    if (ActorContext.AbilitySystemComponent)
+    if (NewContext.AbilitySystemComponent)
     {
-        ActorContext.Avatar = ActorContext.AbilitySystemComponent->GetAvatarActor();
-        ActorContext.MeshComponent = ActorContext.AbilitySystemComponent->AbilityActorInfo->
-                                                  SkeletalMeshComponent.Get();
+        NewContext.Avatar = NewContext.AbilitySystemComponent->GetAvatarActor();
+        NewContext.MeshComponent = NewContext.AbilitySystemComponent->AbilityActorInfo->
+                                              SkeletalMeshComponent.Get();
     }
-    MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ActorContext, this);
+    COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, ActorContext, NewContext, this);
     OnActorContextUpdated.Broadcast();
 }
 
-UAbilitySystemComponent* UTreeckoStateComponent::SearchAbilitySystemComponent()
+UAbilitySystemComponent* UTreeckoStateComponent::SearchAbilitySystemComponent_Implementation()
 {
     const auto Owner = GetOwner();
+
+    if (AbilitySystemComponent)
+    {
+        return AbilitySystemComponent;
+    }
 
     UAbilitySystemComponent* Result = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Owner);
 
@@ -153,7 +171,6 @@ UAbilitySystemComponent* UTreeckoStateComponent::SearchAbilitySystemComponent()
             }
         }
     }
-
 
     return Result;
 }
