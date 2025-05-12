@@ -58,7 +58,6 @@ void UTreeckoStateComponent::GetLifetimeReplicatedProps(TArray<class FLifetimePr
         .bIsPushBased = true
     };
     DOREPLIFETIME_WITH_PARAMS(ThisClass, ActorContext, Params);
-    DOREPLIFETIME_WITH_PARAMS(ThisClass, AbilitySystemComponent, Params);
 }
 
 bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& Context, const bool bLogErrors)
@@ -75,6 +74,7 @@ bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& 
                                  ActorContext.MeshComponent.Get());
     Context.SetContextDataByName(Treecko::FStateTreeContextDataNames::ContextAbilitySystemComponent,
                                  ActorContext.AbilitySystemComponent.Get());
+    Context.SetContextDataByName(Treecko::FStateTreeContextDataNames::ContextController, ActorContext.Controller.Get());
 
     const auto* Schema = CastChecked<UTreeckoStateSchema>(Context.GetStateTree()->GetSchema());
 
@@ -83,6 +83,7 @@ bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& 
     Result &= this->IsA(Schema->StateTreeComponentType);
     Result &= !!ActorContext.MeshComponent;
     Result &= !!ActorContext.AbilitySystemComponent;
+    Result &= !!ActorContext.Controller;
 
     if (!Result)
     {
@@ -91,11 +92,36 @@ bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& 
 
     return Result;
 }
-
-void UTreeckoStateComponent::SetAbilitySystemComponent(
-    UAbilitySystemComponent* InAbilitySystemComponent)
+AController* UTreeckoStateComponent::SearchController_Implementation()
 {
-    COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, AbilitySystemComponent, InAbilitySystemComponent, this);
+    const auto AbilitySystemComponent = ActorContext.AbilitySystemComponent;
+    if (AbilitySystemComponent)
+    {
+        if (AbilitySystemComponent->AbilityActorInfo->PlayerController.IsValid())
+        {
+            return AbilitySystemComponent->AbilityActorInfo->PlayerController.Get();
+        }
+    }
+
+    const auto Owner = GetOwner();
+
+    if (const auto PawnOwner = Cast<APawn>(Owner))
+    {
+        if (const auto PawnController = PawnOwner->GetController())
+        {
+            return PawnController;
+        }
+    }
+
+    if (const auto PSOwner = Cast<APlayerState>(Owner))
+    {
+        if (const auto PSController = PSOwner->GetPlayerController())
+        {
+            return PSController;
+        }
+    }
+
+    return nullptr;
 }
 
 void UTreeckoStateComponent::UpdateActorContext_Implementation()
@@ -110,6 +136,8 @@ void UTreeckoStateComponent::UpdateActorContext_Implementation()
         NewContext.MeshComponent = NewContext.AbilitySystemComponent->AbilityActorInfo->
                                               SkeletalMeshComponent.Get();
     }
+    NewContext.Controller = SearchController();
+
     COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, ActorContext, NewContext, this);
     OnActorContextUpdated.Broadcast();
 }
@@ -117,11 +145,6 @@ void UTreeckoStateComponent::UpdateActorContext_Implementation()
 UAbilitySystemComponent* UTreeckoStateComponent::SearchAbilitySystemComponent_Implementation()
 {
     const auto Owner = GetOwner();
-
-    if (AbilitySystemComponent)
-    {
-        return AbilitySystemComponent;
-    }
 
     UAbilitySystemComponent* Result = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Owner);
 

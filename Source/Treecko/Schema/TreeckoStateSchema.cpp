@@ -18,6 +18,7 @@ namespace Treecko
     const FName FStateTreeContextDataNames::ContextStateTreeComponent = TEXT("State Tree Component");
     const FName FStateTreeContextDataNames::ContextMeshComponent = TEXT("Mesh Component");
     const FName FStateTreeContextDataNames::ContextAbilitySystemComponent = TEXT("Ability System Component");
+    const FName FStateTreeContextDataNames::ContextController = TEXT("Controller");
 }
 
 
@@ -49,6 +50,11 @@ UTreeckoStateSchema::UTreeckoStateSchema(): StateTreeComponentType(UStateTreeCom
             UAbilitySystemComponent::StaticClass(),
             FGuid("8D6D1CC1D0B943378837DC8F7ED2C765")
         },
+        {
+            Treecko::FStateTreeContextDataNames::ContextController,
+            AController::StaticClass(),
+            FGuid("49B973A456E24692856D630F523AC8C8")
+        }
 
     });
 }
@@ -105,6 +111,11 @@ void UTreeckoStateSchema::PostEditChangeChainProperty(FPropertyChangedChainEvent
             && Property->GetFName() == GET_MEMBER_NAME_CHECKED(UTreeckoStateSchema, StateTreeComponentType))
         {
             ContextDataDescs[2].Struct = StateTreeComponentType.Get();
+        }
+        if (Property->GetOwnerClass() == StaticClass()
+            && Property->GetFName() == GET_MEMBER_NAME_CHECKED(UTreeckoStateSchema, ControllerType))
+        {
+            ContextDataDescs[5].Struct = ControllerType.Get();
         }
     }
 }

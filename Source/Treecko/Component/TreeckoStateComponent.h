@@ -25,10 +25,13 @@ struct TREECKO_API FTreeckoStateTreeActorContext
     UPROPERTY(BlueprintReadOnly)
     TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
+    UPROPERTY(BlueprintReadOnly)
+    TObjectPtr<AController> Controller;
+
     bool operator==(const FTreeckoStateTreeActorContext& Other) const
     {
         return Owner == Other.Owner && Avatar == Other.Avatar && MeshComponent == Other.MeshComponent &&
-            AbilitySystemComponent == Other.AbilitySystemComponent;
+            AbilitySystemComponent == Other.AbilitySystemComponent && Controller == Other.Controller;
     }
 };
 
@@ -58,10 +61,6 @@ public:
     UPROPERTY(BlueprintReadOnly, Replicated)
     FTreeckoStateTreeActorContext ActorContext;
 
-    UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category="Treecko")
-    void SetAbilitySystemComponent(UPARAM(DisplayName="Ability System Component")
-        UAbilitySystemComponent* InAbilitySystemComponent);
-
     UFUNCTION(BlueprintCallable, NetMulticast, Reliable)
     void UpdateActorContext();
 
@@ -71,7 +70,6 @@ public:
     UFUNCTION(BlueprintNativeEvent)
     UAbilitySystemComponent* SearchAbilitySystemComponent();
 
-private:
-    UPROPERTY(Replicated)
-    TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+    UFUNCTION(BlueprintNativeEvent)
+    AController* SearchController();
 };

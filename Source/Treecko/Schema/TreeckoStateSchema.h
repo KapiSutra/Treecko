@@ -17,7 +17,8 @@ namespace Treecko
                            ContextAvatar,
                            ContextStateTreeComponent,
                            ContextMeshComponent,
-                           ContextAbilitySystemComponent;
+                           ContextAbilitySystemComponent,
+                           ContextController;
     };
 }
 
@@ -37,7 +38,7 @@ protected:
     virtual bool IsStructAllowed(const UScriptStruct* InScriptStruct) const override;
     virtual bool IsClassAllowed(const UClass* InScriptStruct) const override;
     virtual bool IsExternalItemAllowed(const UStruct& InStruct) const override;
-    
+
     virtual void PostLoad() override;
     //
 
@@ -54,6 +55,9 @@ public:
 
     UPROPERTY(EditAnywhere, NoClear)
     TSubclassOf<UStateTreeComponent> StateTreeComponentType;
+
+    UPROPERTY(EditAnywhere, NoClear)
+    TSubclassOf<AController> ControllerType = AController::StaticClass();
 
 protected:
 #if WITH_EDITOR
