@@ -36,7 +36,8 @@ struct TREECKO_API FTreeckoStateTreeActorContext
 };
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTreeckoActorContextUpdatedDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTreeckoActorContextUpdatedDelegate, const FTreeckoStateTreeActorContext&,
+                                            OldContext);
 
 UCLASS(ClassGroup=(Treecko), meta=(BlueprintSpawnableComponent), Blueprintable)
 class TREECKO_API UTreeckoStateComponent : public UStateTreeComponent
@@ -61,8 +62,14 @@ public:
     UPROPERTY(BlueprintReadOnly, Replicated)
     FTreeckoStateTreeActorContext ActorContext;
 
-    UFUNCTION(BlueprintCallable, NetMulticast, Reliable)
+    UFUNCTION(BlueprintCallable)
+    virtual void RequestUpdateActorContext();
+
+    UFUNCTION(BlueprintNativeEvent)
     void UpdateActorContext();
+
+    UFUNCTION(Server, Reliable)
+    void Server_UpdateActorContext();
 
     UPROPERTY(BlueprintAssignable)
     FTreeckoActorContextUpdatedDelegate OnActorContextUpdated;

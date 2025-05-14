@@ -39,7 +39,7 @@ void UTreeckoStateComponent::InitializeComponent()
 
 void UTreeckoStateComponent::StartLogic()
 {
-    UpdateActorContext();
+    RequestUpdateActorContext();
     Super::StartLogic();
 }
 
@@ -92,6 +92,12 @@ bool UTreeckoStateComponent::SetContextRequirements(FStateTreeExecutionContext& 
 
     return Result;
 }
+
+void UTreeckoStateComponent::Server_UpdateActorContext_Implementation()
+{
+    UpdateActorContext();
+}
+
 AController* UTreeckoStateComponent::SearchController_Implementation()
 {
     const auto AbilitySystemComponent = ActorContext.AbilitySystemComponent;
@@ -124,9 +130,19 @@ AController* UTreeckoStateComponent::SearchController_Implementation()
     return nullptr;
 }
 
+void UTreeckoStateComponent::RequestUpdateActorContext()
+{
+    UpdateActorContext();
+    if (!GetOwner()->HasAuthority())
+    {
+        Server_UpdateActorContext();
+    }
+}
+
 void UTreeckoStateComponent::UpdateActorContext_Implementation()
 {
     FTreeckoStateTreeActorContext NewContext{};
+    const auto OldContext = ActorContext;
     NewContext.Owner = GetOwner();
     NewContext.AbilitySystemComponent = SearchAbilitySystemComponent();
 
@@ -139,7 +155,8 @@ void UTreeckoStateComponent::UpdateActorContext_Implementation()
     NewContext.Controller = SearchController();
 
     COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, ActorContext, NewContext, this);
-    OnActorContextUpdated.Broadcast();
+    OnActorContextUpdated.Broadcast(OldContext);
+    GetOwner()->ForceNetUpdate();
 }
 
 UAbilitySystemComponent* UTreeckoStateComponent::SearchAbilitySystemComponent_Implementation()
