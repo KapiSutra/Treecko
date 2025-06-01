@@ -86,6 +86,10 @@ bool UTreeckoStateSchema::IsExternalItemAllowed(const UStruct& InStruct) const
 void UTreeckoStateSchema::PostLoad()
 {
     Super::PostLoad();
+    ContextDataDescs[0].Struct = OwnerType.Get();
+    ContextDataDescs[1].Struct = AvatarType.Get();
+    ContextDataDescs[2].Struct = StateTreeComponentType.Get();
+    ContextDataDescs[5].Struct = ControllerType.Get();
 }
 
 #if WITH_EDITOR
@@ -119,4 +123,5 @@ void UTreeckoStateSchema::PostEditChangeChainProperty(FPropertyChangedChainEvent
         }
     }
 }
+
 #endif
